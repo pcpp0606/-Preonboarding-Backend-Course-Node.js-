@@ -19,3 +19,12 @@
   npm add express dotenv // 배포에서도 사용
 
   npm add -D prettier nodemon // 개발할때만 사용
+
+  npm add prisma
+
+  .env에 DB 내용 추가
+  DATABASE_URL=mysql://{ID}:{PW}@{주소}:{포트번호}/{DB테이블}
+
+  npm add bcrypt
+  npm add jsonwebtoken
+  npm add joi
