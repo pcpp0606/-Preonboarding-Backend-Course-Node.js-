@@ -4,12 +4,62 @@ import jwt from 'jsonwebtoken';
 import { HTTP_STATUS } from '../constants/http-status.constant.js';
 import { MESSAGES } from '../constants/message.constant.js';
 import { signUpValidator } from '../middlewares/validators/sign-up-validator.middleware.js';
+import { logInValidator } from '../middlewares/validators/login-validator.middleware.js';
 import { prisma } from '../utils/prisma.util.js';
 import { ACCESS_TOKEN_EXPIRES_IN, HASH_SALT_ROUNDS } from '../constants/auth.constant.js';
 import { ACCESS_TOKEN_SECRET } from '../constants/env.constant.js';
 
 const authRouter = express.Router();
 
+/**
+ * @swagger
+ * /auth/sign-up:
+ *   post:
+ *     summary: 회원가입
+ *     description: 새로운 유저를 회원가입시킵니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: 유저네임
+ *               password:
+ *                 type: string
+ *                 description: 비밀번호
+ *               nickname:
+ *                 type: string
+ *                 description: 닉네임
+ *     responses:
+ *       201:
+ *         description: 회원가입 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   description: 유저네임
+ *                 nickname:
+ *                   type: string
+ *                   description: 닉네임
+ *                 authorities:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       authorityName:
+ *                         type: string
+ *                         description: 유저 권한
+ *       409:
+ *         description: 유저네임 또는 닉네임이 중복됨
+ *       500:
+ *         description: 서버 에러
+ */
 authRouter.post('/sign-up', signUpValidator, async (req, res, next) => {
     try {
         const { username, password, nickname } = req.body;
@@ -68,8 +118,46 @@ authRouter.post('/sign-up', signUpValidator, async (req, res, next) => {
     }
 });
 
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: 로그인
+ *     description: 유저가 로그인할 수 있는 API
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: 유저네임
+ *               password:
+ *                 type: string
+ *                 description: 비밀번호
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       description: JWT 액세스 토큰
+ *       401:
+ *         description: 유효하지 않은 자격 증명 (비밀번호가 맞지 않거나 유저가 존재하지 않음)
+ *       500:
+ *         description: 서버 에러
+ */
 // 로그인 api
-authRouter.post('/login', async (req, res, next) => {
+authRouter.post('/login', logInValidator, async (req, res, next) => {
     try {
         const { username, password } = req.body;
 
